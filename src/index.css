@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-primary: var(--color-teal-600);
+  --color-brand-primary-hover: var(--color-teal-700);
+  --color-brand-deep: var(--color-teal-900);
+  --color-brand-secondary: var(--color-slate-700);
+  --color-brand-secondary-hover: var(--color-slate-800);
+  --color-brand-accent: var(--color-orange-500);
+  --color-brand-accent-hover: var(--color-orange-600);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #fafafb;
+  color: #1e293b;
+}
+
+/* Custom animations and utilities */
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+

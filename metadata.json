@@ -1,0 +1,6 @@
+{
+  "name": "Diagnostics Center Website",
+  "description": "A clean, modern, single-page website for a diagnostic center featuring services, health packages, report downloads, about us, and booking options.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
