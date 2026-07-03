@@ -1,9 +1,11 @@
 import React from 'react';
+import { useAppConfig } from '../context/ConfigContext';
 import { WHY_CHOOSE_US } from '../data';
 import DynamicIcon from './DynamicIcon';
 import { motion } from 'motion/react';
 
 export default function WhyChooseUs() {
+  const { config } = useAppConfig();
   return (
     <section id="why-choose-us" className="py-24 bg-slate-50 border-y border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,13 +20,13 @@ export default function WhyChooseUs() {
               transition={{ duration: 0.5 }}
             >
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-mono tracking-wider bg-teal-100 text-teal-800 uppercase mb-4">
-                Our Guarantee
+                {config.whyChooseUsBadge || 'Our Guarantee'}
               </span>
               <h2 className="text-3xl md:text-4xl font-display font-extrabold text-slate-800 tracking-tight leading-none">
-                Clinical Standards You Can Count On
+                {config.whyChooseUsTitle || 'Clinical Standards You Can Count On'}
               </h2>
               <p className="mt-4 text-base text-slate-500 font-sans leading-relaxed">
-                Health decisions require total clarity. We hold ourselves to uncompromising accuracy levels and extreme efficiency to give you, your family, and your physician immediate peace of mind.
+                {config.whyChooseUsSubtitle || 'Health decisions require total clarity. We hold ourselves to uncompromising accuracy levels and extreme efficiency to give you, your family, and your physician immediate peace of mind.'}
               </p>
               
               <div className="mt-8 flex flex-wrap gap-4 text-xs font-mono font-bold text-slate-500">

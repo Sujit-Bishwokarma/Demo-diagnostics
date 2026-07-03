@@ -79,7 +79,7 @@ export default function QuickBookingModal({ isOpen, onClose, preSelectedService 
     const serviceDetails = selectedService || 'General Diagnostics';
     const collectionText = homeCollection ? 'Yes (Home Sample Collection requested)' : 'No (In-clinic appointment)';
     const dateText = bookingDate ? `on ${bookingDate}` : '';
-    const text = `Hi Apex Diagnostics, I would like to confirm my clinical appointment.
+    const text = `Hi ${config.siteTitle}, I would like to confirm my clinical appointment.
     
 📝 *Booking Reference:* ${generatedBookingId}
 👤 *Patient Name:* ${patientName}
@@ -125,7 +125,7 @@ Please guide me with the pre-test instructions and confirmation detail.`;
               <div className="flex items-center space-x-2 mb-2">
                 <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse" />
                 <span className="text-xs font-mono font-bold tracking-widest text-orange-400 uppercase">
-                  Apex Rapid Booking Deck
+                  {config.siteTitle.split(' ')[0] || "Apex"} Rapid Booking Deck
                 </span>
               </div>
               <h3 className="text-xl font-display font-extrabold tracking-tight">

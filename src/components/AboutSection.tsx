@@ -26,7 +26,7 @@ export default function AboutSection() {
               Compassionate Care Meets Absolute Precision
             </h2>
             <p className="mt-5 text-lg text-slate-600 leading-relaxed font-sans font-medium">
-              Apex Diagnostics & Research Center has been Metro City's most trusted testing center since 2012. We leverage state-of-the-art medical technology to provide swift, highly accurate diagnostics in a welcoming environment.
+              {config.siteTitle} has been {config.address.split(',')[0] || "Chitwan"}'s most trusted testing center since 2012. We leverage state-of-the-art medical technology to provide swift, highly accurate diagnostics in a welcoming environment.
             </p>
           </motion.div>
         </div>

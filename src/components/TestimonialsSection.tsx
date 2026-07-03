@@ -69,13 +69,13 @@ export default function TestimonialsSection() {
             transition={{ duration: 0.5 }}
           >
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-mono tracking-wider bg-teal-100 text-teal-800 uppercase mb-4">
-              Patient Feedback
+              {config.testimonialsBadge || 'Patient Feedback'}
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-extrabold text-slate-800 tracking-tight leading-none">
-              What Our Patients Say
+              {config.testimonialsTitle || 'What Our Patients Say'}
             </h2>
             <p className="mt-4 text-sm text-slate-500 font-sans">
-              Real stories from individuals and business groups who trust our diagnostic workflows.
+              {config.testimonialsSubtitle || 'Real stories from individuals and business groups who trust our diagnostic workflows.'}
             </p>
           </motion.div>
         </div>
@@ -114,7 +114,7 @@ export default function TestimonialsSection() {
 
                 {/* Comment quote */}
                 <p className="text-slate-600 text-base md:text-lg font-sans leading-relaxed italic">
-                  "{current.comment}"
+                  "{current.comment.replace(/Apex Diagnostics/g, config.siteTitle).replace(/Apex/g, config.siteTitle.split(' ')[0])}"
                 </p>
 
                 {/* Signature */}

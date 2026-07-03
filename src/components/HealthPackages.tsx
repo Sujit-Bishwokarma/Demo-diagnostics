@@ -24,13 +24,13 @@ export default function HealthPackages({ onSelectPackage }: HealthPackagesProps)
             transition={{ duration: 0.5 }}
           >
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-mono tracking-wider bg-teal-50 text-teal-600 uppercase border border-teal-200/50 mb-4">
-              Preventative Healthcare
+              {config.packagesBadge || 'Preventative Healthcare'}
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-extrabold text-slate-800 tracking-tight leading-none">
-              Health Packages & Screening Plans
+              {config.packagesTitle || 'Health Packages & Screening Plans'}
             </h2>
             <p className="mt-4 text-base text-slate-500 font-sans leading-relaxed">
-              Investing in early detection is the smartest health choice. Select our medical-expert designed health panels below.
+              {config.packagesSubtitle || 'Investing in early detection is the smartest health choice. Select our medical-expert designed health panels below.'}
             </p>
           </motion.div>
         </div>

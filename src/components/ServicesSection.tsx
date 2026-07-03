@@ -71,7 +71,7 @@ export default function ServicesSection({ onSelectService }: ServicesSectionProp
 
       return false;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, config.services]);
 
   return (
     <section id="services" className="py-24 bg-slate-50 relative overflow-hidden">
@@ -87,13 +87,13 @@ export default function ServicesSection({ onSelectService }: ServicesSectionProp
             transition={{ duration: 0.5 }}
           >
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-mono tracking-wider bg-teal-50 text-teal-600 uppercase border border-teal-200/50 mb-4">
-              Diagnostic Directory &amp; Price Catalog
+              {config.servicesBadge || 'Diagnostic Directory & Price Catalog'}
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-extrabold text-slate-800 tracking-tight leading-tight">
-              Clinical Diagnostic Catalog
+              {config.servicesTitle || 'Clinical Diagnostic Catalog'}
             </h2>
             <p className="mt-4 text-base text-slate-500 font-sans leading-relaxed">
-              Search through our complete list of diagnostics services, verify pricing transparency, and book appointments instantly.
+              {config.servicesSubtitle || 'Search through our complete list of diagnostics services, verify pricing transparency, and book appointments instantly.'}
             </p>
           </motion.div>
         </div>
@@ -242,7 +242,9 @@ export default function ServicesSection({ onSelectService }: ServicesSectionProp
                 Clear Search filters
               </button>
               <a
-                href="https://wa.me/15550199?text=Hi,%20I%20am%20looking%20for%20a%20specific%20diagnostic%20service%20not%20listed%20on%20the%20site."
+                href={`https://wa.me/${config.whatsapp}?text=${encodeURIComponent(
+                  "Hi, I am looking for a specific diagnostic service not listed on the site."
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-teal-600 hover:bg-teal-700 text-white font-sans text-sm font-semibold py-2 px-4 rounded-xl transition flex items-center space-x-1.5"
@@ -281,7 +283,9 @@ export default function ServicesSection({ onSelectService }: ServicesSectionProp
               <span>Book Appointment Reservation</span>
             </button>
             <a
-              href="https://wa.me/15550199?text=Hi,%20I'd%20like%20to%20discuss%20my%20prescribed%20tests%20and%20book%20a%20home%20sample%20collection."
+              href={`https://wa.me/${config.whatsapp}?text=${encodeURIComponent(
+                "Hi, I'd like to discuss my prescribed tests and book a home sample collection."
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-slate-800 hover:bg-slate-700 text-white font-sans text-sm font-semibold py-3.5 px-6 rounded-2xl transition duration-300 text-center border border-slate-700 flex items-center justify-center space-x-2"

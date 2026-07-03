@@ -154,7 +154,7 @@ export default function ContactSection({ selectedChoice, onClearChoice }: Contac
                   <div>
                     <h4 className="text-sm font-semibold text-slate-800 font-sans">Email Address</h4>
                     <p className="text-sm text-slate-500 leading-normal mt-1">
-                      info@apexdiagnostics.com
+                      info@{config.siteTitle.toLowerCase().split(' ')[0] || "apex"}.com
                     </p>
                   </div>
                 </div>
@@ -369,7 +369,7 @@ export default function ContactSection({ selectedChoice, onClearChoice }: Contac
             allowFullScreen={true}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="Apex Diagnostics Clinic Location Map"
+            title={`${config.siteTitle} Clinic Location Map`}
           ></iframe>
         </motion.div>
 

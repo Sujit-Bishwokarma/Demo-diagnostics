@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppConfig } from '../context/ConfigContext';
 import { ServiceItem, PackageItem, TeamMember, TestimonialItem, ServiceTestPoint } from '../types';
 import DynamicIcon from './DynamicIcon';
@@ -19,6 +19,21 @@ export default function AdminCPanel() {
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState<'branding' | 'contacts' | 'services' | 'packages' | 'doctors' | 'reviews' | 'backup'>('branding');
 
+  // Custom Toast and Confirmation states to bypass iframe browser native dialog blockages safely
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ message: string; onConfirm: () => void } | null>(null);
+
+  const triggerToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((prev) => (prev?.message === message ? null : prev));
+    }, 4000);
+  };
+
+  const triggerConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmModal({ message, onConfirm });
+  };
+
   // Active items for inline additions/edits
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
@@ -31,6 +46,104 @@ export default function AdminCPanel() {
   const serviceFileRef = useRef<HTMLInputElement>(null);
   const doctorFileRef = useRef<HTMLInputElement>(null);
 
+  // Local draft states for Branding & Hero inputs
+  const [siteTitle, setSiteTitle] = useState(config.siteTitle);
+  const [siteSubtitle, setSiteSubtitle] = useState(config.siteSubtitle);
+  const [heroTitle, setHeroTitle] = useState(config.heroTitle);
+  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle);
+  const [heroImage, setHeroImage] = useState(config.heroImage);
+
+  // Local draft states for Homepage Section Header customizers
+  const [servicesBadge, setServicesBadge] = useState(config.servicesBadge || '');
+  const [servicesTitle, setServicesTitle] = useState(config.servicesTitle || '');
+  const [servicesSubtitle, setServicesSubtitle] = useState(config.servicesSubtitle || '');
+  const [packagesBadge, setPackagesBadge] = useState(config.packagesBadge || '');
+  const [packagesTitle, setPackagesTitle] = useState(config.packagesTitle || '');
+  const [packagesSubtitle, setPackagesSubtitle] = useState(config.packagesSubtitle || '');
+  const [whyChooseUsBadge, setWhyChooseUsBadge] = useState(config.whyChooseUsBadge || '');
+  const [whyChooseUsTitle, setWhyChooseUsTitle] = useState(config.whyChooseUsTitle || '');
+  const [whyChooseUsSubtitle, setWhyChooseUsSubtitle] = useState(config.whyChooseUsSubtitle || '');
+  const [testimonialsBadge, setTestimonialsBadge] = useState(config.testimonialsBadge || '');
+  const [testimonialsTitle, setTestimonialsTitle] = useState(config.testimonialsTitle || '');
+  const [testimonialsSubtitle, setTestimonialsSubtitle] = useState(config.testimonialsSubtitle || '');
+
+  // Local draft states for Contacts & Social inputs
+  const [phone, setPhone] = useState(config.phone);
+  const [address, setAddress] = useState(config.address);
+  const [whatsapp, setWhatsapp] = useState(config.whatsapp);
+  const [facebook, setFacebook] = useState(config.facebook);
+  const [twitter, setTwitter] = useState(config.twitter || '');
+  const [instagram, setInstagram] = useState(config.instagram);
+  const [linkedin, setLinkedin] = useState(config.linkedin);
+
+  // Sync draft states whenever global configuration updates (e.g., reset, upload config)
+  useEffect(() => {
+    setSiteTitle(config.siteTitle);
+    setSiteSubtitle(config.siteSubtitle);
+    setHeroTitle(config.heroTitle);
+    setHeroSubtitle(config.heroSubtitle);
+    setHeroImage(config.heroImage);
+
+    setServicesBadge(config.servicesBadge || '');
+    setServicesTitle(config.servicesTitle || '');
+    setServicesSubtitle(config.servicesSubtitle || '');
+    setPackagesBadge(config.packagesBadge || '');
+    setPackagesTitle(config.packagesTitle || '');
+    setPackagesSubtitle(config.packagesSubtitle || '');
+    setWhyChooseUsBadge(config.whyChooseUsBadge || '');
+    setWhyChooseUsTitle(config.whyChooseUsTitle || '');
+    setWhyChooseUsSubtitle(config.whyChooseUsSubtitle || '');
+    setTestimonialsBadge(config.testimonialsBadge || '');
+    setTestimonialsTitle(config.testimonialsTitle || '');
+    setTestimonialsSubtitle(config.testimonialsSubtitle || '');
+
+    setPhone(config.phone);
+    setAddress(config.address);
+    setWhatsapp(config.whatsapp);
+    setFacebook(config.facebook);
+    setTwitter(config.twitter || '');
+    setInstagram(config.instagram);
+    setLinkedin(config.linkedin);
+  }, [config]);
+
+  // Action to save branding settings explicitly
+  const saveBranding = () => {
+    updateConfig({
+      siteTitle,
+      siteSubtitle,
+      heroTitle,
+      heroSubtitle,
+      heroImage,
+      servicesBadge,
+      servicesTitle,
+      servicesSubtitle,
+      packagesBadge,
+      packagesTitle,
+      packagesSubtitle,
+      whyChooseUsBadge,
+      whyChooseUsTitle,
+      whyChooseUsSubtitle,
+      testimonialsBadge,
+      testimonialsTitle,
+      testimonialsSubtitle
+    });
+    triggerToast('Branding, Hero & Homepage copy updated successfully!', 'success');
+  };
+
+  // Action to save contact settings explicitly
+  const saveContacts = () => {
+    updateConfig({
+      phone,
+      address,
+      whatsapp,
+      facebook,
+      twitter,
+      instagram,
+      linkedin
+    });
+    triggerToast('Contacts & Social configurations updated successfully!', 'success');
+  };
+
   // Passcode login validation
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,26 +151,29 @@ export default function AdminCPanel() {
       setIsAdminLoggedIn(true);
       setLoginError('');
       setPasscode('');
+      triggerToast('Administrative Console unlocked successfully!', 'success');
     } else {
       setLoginError('Incorrect passcode. Use default "admin" or "1234".');
+      triggerToast('Access Denied: Incorrect passcode.', 'error');
     }
   };
 
   // Lock Console (Clear all state and hide instantly)
   const handleLockConsole = () => {
-    if (window.confirm('Are you sure you want to sign out and lock the Administrative Console?')) {
+    triggerConfirm('Are you sure you want to sign out and lock the Administrative Console?', () => {
       setIsAdminLoggedIn(false);
       setIsOpen(false);
-    }
+      triggerToast('Console locked successfully.', 'info');
+    });
   };
 
   // Hard Reset to defaults
   const handleHardReset = () => {
-    if (window.confirm('WARNING: This will clear all custom edits and reset the site to factory defaults. Continue?')) {
+    triggerConfirm('WARNING: This will clear all custom edits and reset the site to factory defaults. Continue?', () => {
       resetConfig();
       setIsOpen(false);
-      alert('Config reset successfully!');
-    }
+      triggerToast('Configurations reset successfully.', 'info');
+    });
   };
 
   // Convert uploaded image file to base64 string
@@ -98,9 +214,9 @@ export default function AdminCPanel() {
         if (typeof text === 'string') {
           const success = importConfig(text);
           if (success) {
-            alert('Site configurations imported successfully!');
+            triggerToast('Site configurations imported successfully!', 'success');
           } else {
-            alert('Invalid configuration file format. Please upload a valid JSON backup.');
+            triggerToast('Invalid configuration file format. Please upload a valid JSON backup.', 'error');
           }
         }
       };
@@ -113,10 +229,13 @@ export default function AdminCPanel() {
     id: '', title: '', description: '', priceEstimate: '', duration: '', iconName: 'Microscope', imageUrl: '', testPoints: []
   });
   const [newTestPoint, setNewTestPoint] = useState<ServiceTestPoint>({ name: '', price: '', description: '' });
+  const [editingTestPointIdx, setEditingTestPointIdx] = useState<number | null>(null);
 
   const startEditService = (service: ServiceItem) => {
     setEditingServiceId(service.id);
     setServiceForm({ ...service });
+    setEditingTestPointIdx(null);
+    setNewTestPoint({ name: '', price: '', description: '' });
   };
 
   const startAddService = () => {
@@ -131,41 +250,59 @@ export default function AdminCPanel() {
       imageUrl: 'https://images.unsplash.com/photo-1579154204601-01588f351167?auto=format&fit=crop&q=80&w=800',
       testPoints: []
     });
+    setEditingTestPointIdx(null);
+    setNewTestPoint({ name: '', price: '', description: '' });
   };
 
   const saveService = () => {
     if (!serviceForm.title || !serviceForm.description) {
-      alert('Please fill out the Service Title and Description.');
+      triggerToast('Please fill out the Service Title and Description.', 'error');
       return;
     }
     const updatedServices = [...config.services];
     if (editingServiceId === 'new') {
       updatedServices.push(serviceForm as ServiceItem);
+      triggerToast('Service package added successfully!', 'success');
     } else {
       const idx = updatedServices.findIndex(s => s.id === editingServiceId);
       if (idx !== -1) updatedServices[idx] = serviceForm as ServiceItem;
+      triggerToast('Service package updated successfully!', 'success');
     }
     updateConfig({ services: updatedServices });
     setEditingServiceId(null);
   };
 
   const deleteService = (id: string) => {
-    if (window.confirm('Delete this service package and all of its test points?')) {
+    triggerConfirm('Are you sure you want to delete this service package and all of its test points?', () => {
       const filtered = config.services.filter(s => s.id !== id);
       updateConfig({ services: filtered });
-    }
+      triggerToast('Service package deleted successfully.', 'success');
+    });
   };
 
-  // Add individual test point inside service
+  const startEditTestPoint = (idx: number, point: ServiceTestPoint) => {
+    setEditingTestPointIdx(idx);
+    setNewTestPoint({ ...point });
+  };
+
+  // Add/Edit individual test point inside service
   const addTestPoint = () => {
     if (!newTestPoint.name || !newTestPoint.price) {
-      alert('Please enter a test name and a price.');
+      triggerToast('Please enter a test name and a price.', 'error');
       return;
     }
-    const currentPoints = serviceForm.testPoints || [];
+    const currentPoints = [...(serviceForm.testPoints || [])];
+    if (editingTestPointIdx !== null) {
+      currentPoints[editingTestPointIdx] = { ...newTestPoint };
+      setEditingTestPointIdx(null);
+      triggerToast('Test point updated.', 'success');
+    } else {
+      currentPoints.push({ ...newTestPoint });
+      triggerToast('Test point added.', 'success');
+    }
     setServiceForm({
       ...serviceForm,
-      testPoints: [...currentPoints, { ...newTestPoint }]
+      testPoints: currentPoints
     });
     setNewTestPoint({ name: '', price: '', description: '' });
   };
@@ -176,6 +313,12 @@ export default function AdminCPanel() {
       ...serviceForm,
       testPoints: currentPoints.filter((_, i) => i !== idx)
     });
+    if (editingTestPointIdx === idx) {
+      setEditingTestPointIdx(null);
+      setNewTestPoint({ name: '', price: '', description: '' });
+    } else if (editingTestPointIdx !== null && editingTestPointIdx > idx) {
+      setEditingTestPointIdx(editingTestPointIdx - 1);
+    }
   };
 
 
@@ -207,7 +350,7 @@ export default function AdminCPanel() {
 
   const savePackage = () => {
     if (!packageForm.name || !packageForm.price) {
-      alert('Please fill out the Package Name and Price.');
+      triggerToast('Please fill out the Package Name and Price.', 'error');
       return;
     }
     const tests = pkgTestInput.split('\n').map(t => t.trim()).filter(t => t.length > 0);
@@ -216,19 +359,22 @@ export default function AdminCPanel() {
     const updatedList = [...config.packages];
     if (editingPackageId === 'new') {
       updatedList.push(updated);
+      triggerToast('Wellness package added successfully!', 'success');
     } else {
       const idx = updatedList.findIndex(p => p.id === editingPackageId);
       if (idx !== -1) updatedList[idx] = updated;
+      triggerToast('Wellness package updated successfully!', 'success');
     }
     updateConfig({ packages: updatedList });
     setEditingPackageId(null);
   };
 
   const deletePackage = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this health package?')) {
+    triggerConfirm('Are you sure you want to delete this health package?', () => {
       const filtered = config.packages.filter(p => p.id !== id);
       updateConfig({ packages: filtered });
-    }
+      triggerToast('Health package deleted successfully.', 'success');
+    });
   };
 
 
@@ -255,25 +401,28 @@ export default function AdminCPanel() {
 
   const saveDoctor = () => {
     if (!doctorForm.name || !doctorForm.title) {
-      alert('Please fill out the doctor name and official title.');
+      triggerToast('Please fill out the doctor name and official title.', 'error');
       return;
     }
     const updatedList = [...config.teamMembers];
     if (editingDoctorId === 'new') {
       updatedList.push(doctorForm as TeamMember);
+      triggerToast('Medical board member added successfully!', 'success');
     } else {
       const idx = updatedList.findIndex(d => d.id === editingDoctorId);
       if (idx !== -1) updatedList[idx] = doctorForm as TeamMember;
+      triggerToast('Medical board details updated successfully!', 'success');
     }
     updateConfig({ teamMembers: updatedList });
     setEditingDoctorId(null);
   };
 
   const deleteDoctor = (id: string) => {
-    if (window.confirm('Remove this medical board member from listings?')) {
+    triggerConfirm('Are you sure you want to remove this medical board member from listings?', () => {
       const filtered = config.teamMembers.filter(d => d.id !== id);
       updateConfig({ teamMembers: filtered });
-    }
+      triggerToast('Medical board member removed successfully.', 'success');
+    });
   };
 
 
@@ -300,25 +449,28 @@ export default function AdminCPanel() {
 
   const saveReview = () => {
     if (!reviewForm.name || !reviewForm.comment) {
-      alert('Please provide patient name and feedback comment.');
+      triggerToast('Please provide patient name and feedback comment.', 'error');
       return;
     }
     const updatedList = [...config.testimonials];
     if (editingReviewId === 'new') {
       updatedList.push(reviewForm as TestimonialItem);
+      triggerToast('Patient review added successfully!', 'success');
     } else {
       const idx = updatedList.findIndex(r => r.id === editingReviewId);
       if (idx !== -1) updatedList[idx] = reviewForm as TestimonialItem;
+      triggerToast('Patient review updated successfully!', 'success');
     }
     updateConfig({ testimonials: updatedList });
     setEditingReviewId(null);
   };
 
   const deleteReview = (id: string) => {
-    if (window.confirm('Permanently remove this patient review?')) {
+    triggerConfirm('Are you sure you want to permanently remove this patient review?', () => {
       const filtered = config.testimonials.filter(r => r.id !== id);
       updateConfig({ testimonials: filtered });
-    }
+      triggerToast('Patient review removed successfully.', 'success');
+    });
   };
 
   return (
@@ -483,9 +635,11 @@ export default function AdminCPanel() {
                     {/* TAB 1: BRANDING & LAYOUT */}
                     {activeTab === 'branding' && (
                       <div className="space-y-6">
-                        <div className="border-b border-slate-800 pb-3">
-                          <h3 className="text-base font-display font-extrabold text-white">Brand Assets &amp; Hero Section</h3>
-                          <p className="text-xs text-slate-400 font-sans mt-1">Configure logo text, custom symbols, and background illustrations.</p>
+                        <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+                          <div>
+                            <h3 className="text-base font-display font-extrabold text-white">Brand Assets &amp; Hero Section</h3>
+                            <p className="text-xs text-slate-400 font-sans mt-1">Configure logo text, custom symbols, and background illustrations.</p>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -494,8 +648,14 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Navbar &amp; Footer Logo Title</label>
                             <input
                               type="text"
-                              value={config.siteTitle}
-                              onChange={(e) => updateConfig({ siteTitle: e.target.value })}
+                              value={siteTitle}
+                              onChange={(e) => {
+                                const newTitle = e.target.value;
+                                setSiteTitle(newTitle);
+                                if (heroTitle === siteTitle || heroTitle === 'Apex Diagnostic & Research Center') {
+                                  setHeroTitle(newTitle);
+                                }
+                              }}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -505,8 +665,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Logo Subtitle</label>
                             <input
                               type="text"
-                              value={config.siteSubtitle}
-                              onChange={(e) => updateConfig({ siteSubtitle: e.target.value })}
+                              value={siteSubtitle}
+                              onChange={(e) => setSiteSubtitle(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -563,8 +723,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Hero Title Greeting</label>
                             <input
                               type="text"
-                              value={config.heroTitle}
-                              onChange={(e) => updateConfig({ heroTitle: e.target.value })}
+                              value={heroTitle}
+                              onChange={(e) => setHeroTitle(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -574,8 +734,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Hero Description</label>
                             <textarea
                               rows={3}
-                              value={config.heroSubtitle}
-                              onChange={(e) => updateConfig({ heroSubtitle: e.target.value })}
+                              value={heroSubtitle}
+                              onChange={(e) => setHeroSubtitle(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs resize-none"
                             />
                           </div>
@@ -585,13 +745,13 @@ export default function AdminCPanel() {
                             <span className="block text-xs font-mono uppercase text-slate-400 font-bold mb-1">Hero Section Background Image</span>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                               <div className="w-24 h-16 bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shrink-0">
-                                <img src={config.heroImage} alt="hero background preview" className="w-full h-full object-cover" />
+                                <img src={heroImage} alt="hero background preview" className="w-full h-full object-cover" />
                               </div>
                               <div className="space-y-2 flex-grow">
                                 <input
                                   type="text"
-                                  value={config.heroImage}
-                                  onChange={(e) => updateConfig({ heroImage: e.target.value })}
+                                  value={heroImage}
+                                  onChange={(e) => setHeroImage(e.target.value)}
                                   placeholder="Or paste an image link..."
                                   className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs"
                                 />
@@ -609,12 +769,185 @@ export default function AdminCPanel() {
                                     ref={heroFileRef}
                                     accept="image/*"
                                     className="hidden"
-                                    onChange={(e) => handleFileUpload(e, (url) => updateConfig({ heroImage: url }))}
+                                    onChange={(e) => handleFileUpload(e, (url) => setHeroImage(url))}
                                   />
                                 </div>
                               </div>
                             </div>
                           </div>
+                        </div>
+
+                        {/* Homepage Section Headers Customizer */}
+                        <div className="pt-6 mt-6 border-t border-slate-800/60">
+                          <h3 className="text-sm font-mono uppercase text-teal-400 font-bold flex items-center gap-2 mb-2">
+                            <DynamicIcon name="Layout" className="text-teal-400 w-4 h-4" />
+                            <span>Homepage Section Headers &amp; Copy</span>
+                          </h3>
+                          <p className="text-xs text-slate-400 font-sans leading-normal mb-5">
+                            Modify titles, sub-headers, and descriptive copy of key homepage sections to match your center's identity.
+                          </p>
+
+                          <div className="space-y-5">
+                            {/* Services Section Copy */}
+                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-4">
+                              <h4 className="text-xs font-mono uppercase text-white font-bold flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                                <span>1. Services Catalog Section</span>
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Badge / Small Header</label>
+                                  <input
+                                    type="text"
+                                    value={servicesBadge}
+                                    onChange={(e) => setServicesBadge(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Main Title</label>
+                                  <input
+                                    type="text"
+                                    value={servicesTitle}
+                                    onChange={(e) => setServicesTitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Subtitle Description</label>
+                                  <textarea
+                                    rows={2}
+                                    value={servicesSubtitle}
+                                    onChange={(e) => setServicesSubtitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs resize-none"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Wellness Packages Copy */}
+                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-4">
+                              <h4 className="text-xs font-mono uppercase text-white font-bold flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                                <span>2. Wellness Packages Section</span>
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Badge / Small Header</label>
+                                  <input
+                                    type="text"
+                                    value={packagesBadge}
+                                    onChange={(e) => setPackagesBadge(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Main Title</label>
+                                  <input
+                                    type="text"
+                                    value={packagesTitle}
+                                    onChange={(e) => setPackagesTitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Subtitle Description</label>
+                                  <textarea
+                                    rows={2}
+                                    value={packagesSubtitle}
+                                    onChange={(e) => setPackagesSubtitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs resize-none"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Why Choose Us Copy */}
+                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-4">
+                              <h4 className="text-xs font-mono uppercase text-white font-bold flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                                <span>3. Clinical Standards (Why Choose Us)</span>
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Badge / Small Header</label>
+                                  <input
+                                    type="text"
+                                    value={whyChooseUsBadge}
+                                    onChange={(e) => setWhyChooseUsBadge(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Main Title</label>
+                                  <input
+                                    type="text"
+                                    value={whyChooseUsTitle}
+                                    onChange={(e) => setWhyChooseUsTitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Subtitle Description</label>
+                                  <textarea
+                                    rows={2}
+                                    value={whyChooseUsSubtitle}
+                                    onChange={(e) => setWhyChooseUsSubtitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs resize-none"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Patient Testimonials Copy */}
+                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-4">
+                              <h4 className="text-xs font-mono uppercase text-white font-bold flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                                <span>4. Patient Testimonials</span>
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Badge / Small Header</label>
+                                  <input
+                                    type="text"
+                                    value={testimonialsBadge}
+                                    onChange={(e) => setTestimonialsBadge(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Main Title</label>
+                                  <input
+                                    type="text"
+                                    value={testimonialsTitle}
+                                    onChange={(e) => setTestimonialsTitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                  <label className="block text-[10px] font-mono uppercase text-slate-500 font-bold">Subtitle Description</label>
+                                  <textarea
+                                    rows={2}
+                                    value={testimonialsSubtitle}
+                                    onChange={(e) => setTestimonialsSubtitle(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg focus:border-teal-500 focus:outline-none text-white text-xs resize-none"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Save Button Footer */}
+                        <div className="flex justify-end pt-2">
+                          <button
+                            type="button"
+                            onClick={saveBranding}
+                            className="px-5 py-2.5 bg-teal-500 text-slate-950 font-extrabold text-xs font-mono uppercase tracking-wider rounded-xl hover:bg-teal-600 transition cursor-pointer flex items-center space-x-2"
+                          >
+                            <DynamicIcon name="Check" className="w-4 h-4" />
+                            <span>Save Branding Settings</span>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -622,9 +955,11 @@ export default function AdminCPanel() {
                     {/* TAB 2: CONTACTS & SOCIAL LINKS */}
                     {activeTab === 'contacts' && (
                       <div className="space-y-6">
-                        <div className="border-b border-slate-800 pb-3">
-                          <h3 className="text-base font-display font-extrabold text-white">Contacts &amp; Social Links</h3>
-                          <p className="text-xs text-slate-400 font-sans mt-1">Configure diagnostic center contact details, address, and social links.</p>
+                        <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+                          <div>
+                            <h3 className="text-base font-display font-extrabold text-white">Contacts &amp; Social Links</h3>
+                            <p className="text-xs text-slate-400 font-sans mt-1">Configure diagnostic center contact details, address, and social links.</p>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -633,8 +968,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Contact Phone Number</label>
                             <input
                               type="text"
-                              value={config.phone}
-                              onChange={(e) => updateConfig({ phone: e.target.value })}
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -644,8 +979,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Clinic Address (Bharatpur, Chitwan)</label>
                             <input
                               type="text"
-                              value={config.address}
-                              onChange={(e) => updateConfig({ address: e.target.value })}
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -655,8 +990,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">WhatsApp Code Link Number</label>
                             <input
                               type="text"
-                              value={config.whatsapp}
-                              onChange={(e) => updateConfig({ whatsapp: e.target.value })}
+                              value={whatsapp}
+                              onChange={(e) => setWhatsapp(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs font-mono"
                             />
                           </div>
@@ -666,8 +1001,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Facebook URL</label>
                             <input
                               type="text"
-                              value={config.facebook}
-                              onChange={(e) => updateConfig({ facebook: e.target.value })}
+                              value={facebook}
+                              onChange={(e) => setFacebook(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -677,8 +1012,8 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">Instagram URL</label>
                             <input
                               type="text"
-                              value={config.instagram}
-                              onChange={(e) => updateConfig({ instagram: e.target.value })}
+                              value={instagram}
+                              onChange={(e) => setInstagram(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
@@ -688,11 +1023,23 @@ export default function AdminCPanel() {
                             <label className="block text-xs font-mono uppercase text-slate-400 font-bold">LinkedIn URL</label>
                             <input
                               type="text"
-                              value={config.linkedin}
-                              onChange={(e) => updateConfig({ linkedin: e.target.value })}
+                              value={linkedin}
+                              onChange={(e) => setLinkedin(e.target.value)}
                               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 focus:outline-none text-white text-xs"
                             />
                           </div>
+                        </div>
+
+                        {/* Save Button Footer */}
+                        <div className="flex justify-end pt-2">
+                          <button
+                            type="button"
+                            onClick={saveContacts}
+                            className="px-5 py-2.5 bg-teal-500 text-slate-950 font-extrabold text-xs font-mono uppercase tracking-wider rounded-xl hover:bg-teal-600 transition cursor-pointer flex items-center space-x-2"
+                          >
+                            <DynamicIcon name="Check" className="w-4 h-4" />
+                            <span>Save Contacts Settings</span>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -818,54 +1165,86 @@ export default function AdminCPanel() {
                               <div className="space-y-2">
                                 {(serviceForm.testPoints || []).map((point, idx) => (
                                   <div key={idx} className="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
-                                    <div>
-                                      <p className="font-bold text-white">{point.name} • <span className="text-teal-400 font-mono">{point.price}</span></p>
+                                    <div className="min-w-0 pr-2">
+                                      <p className="font-bold text-white">
+                                        {point.name} • <span className="text-teal-400 font-mono">{point.price}</span>
+                                        {editingTestPointIdx === idx && (
+                                          <span className="ml-2 px-1.5 py-0.5 bg-teal-500/20 text-teal-400 text-[9px] font-mono rounded uppercase tracking-wider font-extrabold animate-pulse">
+                                            Editing
+                                          </span>
+                                        )}
+                                      </p>
                                       {point.description && <p className="text-[11px] text-slate-400 mt-0.5">{point.description}</p>}
                                     </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => deleteTestPoint(idx)}
-                                      className="text-xs text-rose-400 hover:text-rose-600 font-mono font-bold cursor-pointer px-2 py-1 bg-rose-500/10 rounded"
-                                    >
-                                      Delete
-                                    </button>
+                                    <div className="flex items-center space-x-1.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => startEditTestPoint(idx, point)}
+                                        className="text-xs text-teal-400 hover:text-teal-300 font-mono font-bold cursor-pointer px-2 py-1 bg-teal-500/10 rounded"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => deleteTestPoint(idx)}
+                                        className="text-xs text-rose-400 hover:text-rose-600 font-mono font-bold cursor-pointer px-2 py-1 bg-rose-500/10 rounded"
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
 
-                              {/* Form to add a new test point */}
+                              {/* Form to add/edit a test point */}
                               <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-3">
-                                <span className="block text-[11px] font-mono uppercase text-slate-400">Add Individual Test Point</span>
+                                <span className="block text-[11px] font-mono uppercase text-slate-400">
+                                  {editingTestPointIdx !== null ? 'Edit Individual Test Point' : 'Add Individual Test Point'}
+                                </span>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   <input
                                     type="text"
                                     placeholder="Test Name (e.g. 12-Lead ECG)"
                                     value={newTestPoint.name}
                                     onChange={(e) => setNewTestPoint({ ...newTestPoint, name: e.target.value })}
-                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs"
+                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs text-white"
                                   />
                                   <input
                                     type="text"
                                     placeholder="Price in NPR (e.g. NPR 1,200)"
                                     value={newTestPoint.price}
                                     onChange={(e) => setNewTestPoint({ ...newTestPoint, price: e.target.value })}
-                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs"
+                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs text-white"
                                   />
                                   <input
                                     type="text"
                                     placeholder="Brief Description (optional)"
                                     value={newTestPoint.description || ''}
                                     onChange={(e) => setNewTestPoint({ ...newTestPoint, description: e.target.value })}
-                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs sm:col-span-2"
+                                    className="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs text-white sm:col-span-2"
                                   />
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={addTestPoint}
-                                  className="px-3 py-1.5 bg-teal-500 text-slate-950 text-xs font-bold font-mono rounded-lg hover:bg-teal-600 transition cursor-pointer"
-                                >
-                                  + Append Test Point
-                                </button>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    type="button"
+                                    onClick={addTestPoint}
+                                    className="px-3 py-1.5 bg-teal-500 text-slate-950 text-xs font-bold font-mono rounded-lg hover:bg-teal-600 transition cursor-pointer"
+                                  >
+                                    {editingTestPointIdx !== null ? 'Update Test Point' : '+ Append Test Point'}
+                                  </button>
+                                  {editingTestPointIdx !== null && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditingTestPointIdx(null);
+                                        setNewTestPoint({ name: '', price: '', description: '' });
+                                      }}
+                                      className="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs font-bold font-mono rounded-lg hover:bg-slate-700 transition cursor-pointer"
+                                    >
+                                      Cancel
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -1420,6 +1799,77 @@ export default function AdminCPanel() {
                   </div>
                 </div>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification Banner */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-slate-800 flex items-center space-x-3 max-w-md w-[90vw]"
+          >
+            <div className={`p-1.5 rounded-lg shrink-0 ${
+              toast.type === 'error' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+              toast.type === 'info' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+              'bg-teal-500/10 text-teal-400 border border-teal-500/20'
+            }`}>
+              <DynamicIcon name={toast.type === 'error' ? 'AlertCircle' : toast.type === 'info' ? 'Info' : 'CheckSquare'} className="w-5 h-5" />
+            </div>
+            <p className="text-xs font-semibold leading-relaxed font-sans">{toast.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Confirmation Dialog Modal */}
+      <AnimatePresence>
+        {confirmModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmModal(null)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm cursor-pointer"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-sm bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl text-slate-100 z-10 space-y-6"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl shrink-0">
+                  <DynamicIcon name="AlertCircle" className="w-5 h-5" />
+                </div>
+                <div className="space-y-1 text-left">
+                  <h4 className="font-display font-bold text-white text-base">Please Confirm</h4>
+                  <p className="text-xs text-slate-400 leading-normal">{confirmModal.message}</p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs font-mono uppercase rounded-lg transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    confirmModal.onConfirm();
+                    setConfirmModal(null);
+                  }}
+                  className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-xs font-mono uppercase rounded-lg transition cursor-pointer"
+                >
+                  Confirm
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
